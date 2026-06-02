@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>คนละครึ่ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:    #185FA5;
+  --blue-l:  #E6F1FB;
+  --blue-b:  #B5D4F4;
+  --blue-d:  #0C447C;
+  --green:   #3B6D11;
+  --green-l: #EAF3DE;
+  --green-b: #C0DD97;
+  --green-d: #27500A;
+  --amber-l: #FAEEDA;
+  --amber-b: #FAC775;
+  --amber-d: #633806;
+  --red-l:   #FCEBEB;
+  --red-b:   #F7C1C1;
+  --red-d:   #791F1F;
+  --bg:      #F7F6F2;
+  --surface: #FFFFFF;
+  --border:  #E2E0D8;
+  --text:    #1A1917;
+  --muted:   #6B6965;
+  --hint:    #A09D99;
+  --radius:  12px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px 14px 40px;
+}
+
+/* ── header ── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.app-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.device-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  background: var(--border);
+  color: var(--muted);
+  padding: 3px 8px;
+  border-radius: 99px;
+}
+
+/* ── tabs ── */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.tab {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+  font-family: 'Sarabun', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab.active {
+  background: var(--blue-l);
+  border-color: var(--blue-b);
+  color: var(--blue-d);
+  font-weight: 600;
+}
+
+/* ── budget bar ── */
+.budget-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.budget-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.budget-label { font-size: 13px; color: var(--muted); }
+.budget-nums { font-size: 13px; font-weight: 600; }
+.bar-track {
+  height: 8px;
+  background: var(--bg);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease, background 0.3s;
+}
+.bar-ok   { background: var(--blue); }
+.bar-warn { background: #BA7517; }
+.bar-over { background: #A32D2D; }
+.budget-sub {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.budget-remain { font-size: 12px; }
+.budget-month  { font-size: 12px; color: var(--hint); font-family: 'IBM Plex Mono', monospace; }
+
+/* ── alert boxes ── */
+.alert {
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 10px;
+  display: none;
+}
+.alert-warn   { background: var(--amber-l); border: 1px solid var(--amber-b); color: var(--amber-d); }
+.alert-danger { background: var(--red-l);   border: 1px solid var(--red-b);   color: var(--red-d); }
+
+/* ── display ── */
+.display {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  text-align: right;
+  margin-bottom: 10px;
+}
+.display-expr { font-size: 12px; color: var(--hint); min-height: 16px; font-family: 'IBM Plex Mono', monospace; }
+.display-num  { font-size: 34px; font-weight: 500; letter-spacing: -1px; font-family: 'IBM Plex Mono', monospace; line-height: 1.15; word-break: break-all; }
+
+/* ── keypad ── */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.key {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  height: 62px;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  touch-action: manipulation;
+  transition: background 0.1s, transform 0.08s;
+}
+.key:active { transform: scale(0.94); background: var(--bg); }
+.key.op     { color: var(--blue); }
+.key.clr    { color: #A32D2D; font-family: 'Sarabun', sans-serif; font-size: 14px; }
+.key.zero   { grid-column: span 2; }
+.key.eq     { background: var(--blue); border-color: var(--blue); color: #fff; }
+.key.eq:active { background: var(--blue-d); }
+
+/* ── result cards ── */
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rcard {
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  border: 1px solid transparent;
+}
+.rcard.gov { background: var(--blue-l);  border-color: var(--blue-b); }
+.rcard.ppl { background: var(--green-l); border-color: var(--green-b); }
+.rcard-label { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.rcard.gov .rcard-label { color: var(--blue-d); }
+.rcard.ppl .rcard-label { color: var(--green-d); }
+.rcard-pct { font-size: 11px; margin-bottom: 4px; }
+.rcard.gov .rcard-pct { color: var(--blue); }
+.rcard.ppl .rcard-pct { color: var(--green); }
+.rcard-amt { font-size: 22px; font-weight: 600; font-family: 'IBM Plex Mono', monospace; letter-spacing: -0.5px; }
+.rcard.gov .rcard-amt { color: var(--blue-d); }
+.rcard.ppl .rcard-amt { color: var(--green-d); }
+.rcard-unit { font-size: 12px; font-weight: 400; margin-left: 2px; font-family: 'Sarabun', sans-serif; }
+
+/* ── add button ── */
+.add-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Sarabun', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.08s;
+  touch-action: manipulation;
+}
+.add-btn:active:not(:disabled) { background: var(--blue-d); transform: scale(0.98); }
+.add-btn:disabled {
+  background: var(--bg);
+  color: var(--hint);
+  border: 1px solid var(--border);
+  cursor: default;
+}
+
+/* ── status toast ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-family: 'Sarabun', sans-serif;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+  z-index: 999;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── history tab ── */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.month-nav button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+  touch-action: manipulation;
+}
+.month-nav button:active { background: var(--bg); }
+.month-title { font-size: 16px; font-weight: 600; }
+
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sum-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.sum-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.sum-val   { font-size: 16px; font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
+
+.hist-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hist-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--hint);
+  font-size: 14px;
+}
+.hist-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-time  { font-size: 11px; color: var(--hint); font-family: 'IBM Plex Mono', monospace; margin-bottom: 2px; }
+.hist-total { font-size: 16px; font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
+.hist-right { margin-left: auto; text-align: right; }
+.hist-gov   { font-size: 12px; color: var(--blue); }
+.hist-ppl   { font-size: 13px; font-weight: 600; color: var(--green-d); font-family: 'IBM Plex Mono', monospace; }
+.hist-del   { background: none; border: none; color: var(--hint); font-size: 18px; cursor: pointer; padding: 4px; line-height: 1; touch-action: manipulation; }
+.hist-del:active { color: #A32D2D; }
+
+.loading-row { text-align: center; padding: 30px; color: var(--hint); font-size: 14px; }
+
+/* ── sync indicator ── */
+.sync-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.sync-ok   { background: #639922; }
+.sync-err  { background: #A32D2D; }
+.sync-busy { background: #BA7517; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.panel { display: none; }
+.panel.active { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ── SETUP: ใส่ค่า Supabase ของคุณตรงนี้ ── -->
+  <!-- แก้ 2 บรรทัดนี้แล้วบันทึกไฟล์ -->
+
+  <div class="app-header">
+    <span class="app-title">คนละครึ่ง</span>
+    <span class="device-badge" id="device-badge">loading…</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('calc',this)">&#128197; คำนวณ</button>
+    <button class="tab" onclick="switchTab('hist',this)">&#128200; ประวัติ</button>
+  </div>
+
+  <!-- ── CALC PANEL ── -->
+  <div id="panel-calc" class="panel active">
+
+    <div class="budget-card">
+      <div class="budget-row">
+        <span class="budget-label">วงเงินรัฐเดือนนี้ <span class="sync-dot sync-busy" id="sync-dot"></span></span>
+        <span class="budget-nums"><span id="b-used">0.00</span> / 1,000 บาท</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill bar-ok" id="b-bar" style="width:0%"></div>
+      </div>
+      <div class="budget-sub">
+        <span class="budget-remain" id="b-remain">เหลือ 1,000.00 บาท</span>
+        <span class="budget-month" id="b-month"></span>
+      </div>
+    </div>
+
+    <div class="alert alert-warn"   id="alert-warn"></div>
+    <div class="alert alert-danger" id="alert-danger"></div>
+
+    <div class="display">
+      <div class="display-expr" id="expr"></div>
+      <div class="display-num"  id="display">0</div>
+    </div>
+
+    <div class="keypad">
+      <button class="key clr"  onclick="press('C')">ล้าง</button>
+      <button class="key op"   onclick="press('←')">&#9003;</button>
+      <button class="key op"   onclick="press('%')">%</button>
+      <button class="key op"   onclick="press('/')">÷</button>
+      <button class="key"      onclick="press('7')">7</button>
+      <button class="key"      onclick="press('8')">8</button>
+      <button class="key"      onclick="press('9')">9</button>
+      <button class="key op"   onclick="press('*')">×</button>
+      <button class="key"      onclick="press('4')">4</button>
+      <button class="key"      onclick="press('5')">5</button>
+      <button class="key"      onclick="press('6')">6</button>
+      <button class="key op"   onclick="press('-')">−</button>
+      <button class="key"      onclick="press('1')">1</button>
+      <button class="key"      onclick="press('2')">2</button>
+      <button class="key"      onclick="press('3')">3</button>
+      <button class="key op"   onclick="press('+')">+</button>
+      <button class="key zero" onclick="press('0')">0</button>
+      <button class="key"      onclick="press('.')">.</button>
+      <button class="key eq"   onclick="press('=')">=</button>
+    </div>
+
+    <div class="result-row">
+      <div class="rcard gov">
+        <div class="rcard-label">รัฐจ่าย</div>
+        <div class="rcard-pct">60%</div>
+        <div class="rcard-amt" id="gov-amt">0<span class="rcard-unit">บาท</span></div>
+      </div>
+      <div class="rcard ppl">
+        <div class="rcard-label">คุณจ่าย</div>
+        <div class="rcard-pct">40%</div>
+        <div class="rcard-amt" id="ppl-amt">0<span class="rcard-unit">บาท</span></div>
+      </div>
+    </div>
+
+    <button class="add-btn" id="add-btn" onclick="addRecord()" disabled>
+      + บันทึกรายการนี้
+    </button>
+  </div>
+
+  <!-- ── HISTORY PANEL ── -->
+  <div id="panel-hist" class="panel">
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)">&#8592;</button>
+      <span class="month-title" id="month-title"></span>
+      <button onclick="changeMonth(1)">&#8594;</button>
+    </div>
+    <div class="summary-row">
+      <div class="sum-card">
+        <div class="sum-label">รายการทั้งหมด</div>
+        <div class="sum-val" id="sum-count">0</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">ยอดซื้อรวม</div>
+        <div class="sum-val" id="sum-total">0</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">รัฐออก</div>
+        <div class="sum-val" id="sum-gov" style="color:var(--blue)">0</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">คุณออก</div>
+        <div class="sum-val" id="sum-ppl" style="color:var(--green)">0</div>
+      </div>
+    </div>
+    <div class="hist-list" id="hist-list">
+      <div class="loading-row">กำลังโหลด…</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════
+   ⚙️  ตั้งค่า Supabase — แก้ 2 บรรทัดนี้
+   ════════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://xxxxxxxxxxxx.supabase.co'   // ← ใส่ Project URL ของคุณ
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6...'   // ← ใส่ anon/public key ของคุณ
+/* ════════════════════════════════════════════════ */
+
+const BUDGET = 1000
+
+/* ── Supabase client ── */
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+/* ── Device ID (สร้างครั้งเดียว บันทึก localStorage) ── */
+function getDeviceId() {
+  let id = localStorage.getItem('kk_device_id')
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36)
+    localStorage.setItem('kk_device_id', id)
+  }
+  return id
+}
+const DEVICE_ID = getDeviceId()
+document.getElementById('device-badge').textContent = DEVICE_ID.slice(0,10) + '…'
+
+/* ── Helpers ── */
+const fmt  = n => (+n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2})
+const thMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
+
+function setSyncDot(state) {
+  const d = document.getElementById('sync-dot')
+  d.className = 'sync-dot sync-' + state
+}
+
+function showToast(msg, ms=2200) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), ms)
+}
+
+/* ── Month helpers ── */
+let viewMonth = new Date(); viewMonth.setDate(1)
+
+function currentMonthKey() {
+  const d = new Date(); d.setDate(1)
+  return monthKey(d)
+}
+function monthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0')
+}
+function monthStart(d) { return new Date(d.getFullYear(), d.getMonth(), 1).toISOString() }
+function monthEnd(d)   { return new Date(d.getFullYear(), d.getMonth()+1, 1).toISOString() }
+
+/* ── Budget ── */
+async function fetchUsedBudget(mk) {
+  const d = new Date(mk + '-01')
+  const { data, error } = await sb
+    .from('kk_records')
+    .select('gov_amount')
+    .eq('device_id', DEVICE_ID)
+    .gte('created_at', monthStart(d))
+    .lt('created_at', monthEnd(d))
+  if (error) return 0
+  return data.reduce((s, r) => s + r.gov_amount, 0)
+}
+
+async function updateBudgetBar() {
+  setSyncDot('busy')
+  const mk   = currentMonthKey()
+  const d    = new Date(mk + '-01')
+  const used = await fetchUsedBudget(mk)
+  const pct  = Math.min(used / BUDGET * 100, 100)
+  const rem  = Math.max(BUDGET - used, 0)
+
+  document.getElementById('b-used').textContent = fmt(used)
+  document.getElementById('b-month').textContent = thMonths[d.getMonth()] + ' ' + (d.getFullYear()+543)
+
+  const bar = document.getElementById('b-bar')
+  bar.style.width = pct.toFixed(1) + '%'
+  bar.className = 'bar-fill ' + (pct>=100?'bar-over':pct>=80?'bar-warn':'bar-ok')
+
+  const remEl = document.getElementById('b-remain')
+  if (rem <= 0) { remEl.textContent = 'วงเงินรัฐหมดแล้วเดือนนี้'; remEl.style.color='#A32D2D' }
+  else          { remEl.textContent = 'เหลือ ' + fmt(rem) + ' บาท'; remEl.style.color='var(--muted)' }
+
+  setSyncDot('ok')
+  return used
+}
+
+/* ── Calculator state ── */
+let current = '0', expr = '', justCalc = false
+let cachedUsed = 0
+
+function press(key) {
+  if (key==='C') { current='0'; expr=''; justCalc=false }
+  else if (key==='←') {
+    if (justCalc) { current='0'; expr=''; justCalc=false }
+    else { current = current.length>1 ? current.slice(0,-1) : '0' }
+  }
+  else if (key==='=') {
+    try {
+      const safe = current.replace(/÷/g,'/').replace(/×/g,'*')
+      expr = current + ' ='
+      current = String(parseFloat(eval(safe).toFixed(2)))
+      justCalc = true
+    } catch(e) { current='Error' }
+  }
+  else if (['+','-','*','/','%'].includes(key)) {
+    if (justCalc) justCalc = false
+    current += key==='*'?'×' : key==='/'?'÷' : key
+    expr = ''
+  }
+  else if (key==='.') {
+    const parts = current.split(/[+\-×÷%]/)
+    if (!parts[parts.length-1].includes('.')) current += '.'
+  }
+  else {
+    if (justCalc) { current=key; justCalc=false }
+    else { current = current==='0' ? key : current+key }
+  }
+  document.getElementById('display').textContent = current
+  document.getElementById('expr').textContent = expr
+  updateCalcDisplay()
+}
+
+function updateCalcDisplay() {
+  const total = parseFloat(current)
+  const warnEl   = document.getElementById('alert-warn')
+  const dangerEl = document.getElementById('alert-danger')
+  warnEl.style.display = 'none'
+  dangerEl.style.display = 'none'
+
+  if (!isNaN(total) && total > 0) {
+    const remain   = Math.max(BUDGET - cachedUsed, 0)
+    const govFull  = parseFloat((total * 0.6).toFixed(2))
+    const govActual= parseFloat(Math.min(govFull, remain).toFixed(2))
+    const pplActual= parseFloat((total - govActual).toFixed(2))
+
+    if (remain <= 0) {
+      dangerEl.style.display='block'
+      dangerEl.textContent = '⚠️ วงเงินรัฐหมดแล้ว คุณต้องจ่ายเต็ม ' + fmt(total) + ' บาท'
+      document.getElementById('gov-amt').innerHTML = '0<span class="rcard-unit">บาท</span>'
+      document.getElementById('ppl-amt').innerHTML = fmt(total) + '<span class="rcard-unit">บาท</span>'
+    } else if (govFull > remain) {
+      warnEl.style.display='block'
+      warnEl.textContent = '⚡ วงเงินรัฐเหลือ ' + fmt(remain) + ' บาท — ส่วนเกินคุณออกเอง'
+      document.getElementById('gov-amt').innerHTML = fmt(govActual) + '<span class="rcard-unit">บาท</span>'
+      document.getElementById('ppl-amt').innerHTML = fmt(pplActual) + '<span class="rcard-unit">บาท</span>'
+    } else {
+      document.getElementById('gov-amt').innerHTML = fmt(govFull)  + '<span class="rcard-unit">บาท</span>'
+      document.getElementById('ppl-amt').innerHTML = fmt(total*0.4) + '<span class="rcard-unit">บาท</span>'
+    }
+    document.getElementById('add-btn').disabled = false
+  } else {
+    document.getElementById('gov-amt').innerHTML = '0<span class="rcard-unit">บาท</span>'
+    document.getElementById('ppl-amt').innerHTML = '0<span class="rcard-unit">บาท</span>'
+    document.getElementById('add-btn').disabled = true
+  }
+}
+
+/* ── Add record ── */
+async function addRecord() {
+  const total = parseFloat(current)
+  if (isNaN(total) || total <= 0) return
+
+  const mk      = currentMonthKey()
+  const d       = new Date(mk + '-01')
+  const remain  = Math.max(BUDGET - cachedUsed, 0)
+  const govFull = parseFloat((total * 0.6).toFixed(2))
+  const govActual = parseFloat(Math.min(govFull, remain).toFixed(2))
+  const pplActual = parseFloat((total - govActual).toFixed(2))
+
+  document.getElementById('add-btn').disabled = true
+  setSyncDot('busy')
+
+  const { error } = await sb.from('kk_records').insert({
+    device_id:  DEVICE_ID,
+    total_amount: total,
+    gov_amount:   govActual,
+    ppl_amount:   pplActual
+  })
+
+  if (error) {
+    showToast('บันทึกไม่สำเร็จ — ' + error.message)
+    setSyncDot('err')
+    document.getElementById('add-btn').disabled = false
+    return
+  }
+
+  showToast('บันทึกแล้ว ' + fmt(total) + ' บาท')
+  current='0'; expr=''; justCalc=false
+  document.getElementById('display').textContent = '0'
+  document.getElementById('expr').textContent = ''
+  cachedUsed = await updateBudgetBar()
+  updateCalcDisplay()
+}
+
+/* ── History ── */
+async function renderHistory() {
+  document.getElementById('hist-list').innerHTML = '<div class="loading-row">กำลังโหลด…</div>'
+  const d = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1)
+  document.getElementById('month-title').textContent = thMonths[d.getMonth()] + ' ' + (d.getFullYear()+543)
+
+  const { data, error } = await sb
+    .from('kk_records')
+    .select('*')
+    .eq('device_id', DEVICE_ID)
+    .gte('created_at', monthStart(d))
+    .lt('created_at',  monthEnd(d))
+    .order('created_at', { ascending: false })
+
+  const records = error ? [] : data
+
+  const totals = records.reduce((a,r)=>({t:a.t+r.total_amount, g:a.g+r.gov_amount, p:a.p+r.ppl_amount}),{t:0,g:0,p:0})
+  document.getElementById('sum-count').textContent = records.length
+  document.getElementById('sum-total').textContent = fmt(totals.t)
+  document.getElementById('sum-gov').textContent   = fmt(totals.g)
+  document.getElementById('sum-ppl').textContent   = fmt(totals.p)
+
+  const list = document.getElementById('hist-list')
+  if (!records.length) {
+    list.innerHTML = '<div class="hist-empty">ยังไม่มีรายการเดือนนี้</div>'
+    return
+  }
+  list.innerHTML = records.map(r => {
+    const t = new Date(r.created_at)
+    const timeStr = t.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})
+    const dateStr = t.getDate() + ' ' + thMonths[t.getMonth()]
+    return `<div class="hist-item">
+      <div>
+        <div class="hist-time">${dateStr} · ${timeStr}</div>
+        <div class="hist-total">${fmt(r.total_amount)} บ.</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-gov">รัฐ ${fmt(r.gov_amount)} บ.</div>
+        <div class="hist-ppl">คุณ ${fmt(r.ppl_amount)} บ.</div>
+      </div>
+      <button class="hist-del" onclick="delRecord('${r.id}')" aria-label="ลบ">&#128465;</button>
+    </div>`
+  }).join('')
+}
+
+async function delRecord(id) {
+  const { error } = await sb.from('kk_records').delete().eq('id', id).eq('device_id', DEVICE_ID)
+  if (error) { showToast('ลบไม่สำเร็จ'); return }
+  showToast('ลบรายการแล้ว')
+  cachedUsed = await updateBudgetBar()
+  renderHistory()
+}
+
+function changeMonth(delta) {
+  viewMonth.setMonth(viewMonth.getMonth() + delta)
+  renderHistory()
+}
+
+function switchTab(t, el) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  el.classList.add('active')
+  document.getElementById('panel-' + t).classList.add('active')
+  if (t === 'hist') renderHistory()
+}
+
+/* ── Keyboard support ── */
+document.addEventListener('keydown', e => {
+  const map = {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','+':'+','-':'-','*':'*','/':'/','%':'%','.':'.','Enter':'=','Backspace':'←','Escape':'C'}
+  if (map[e.key]) press(map[e.key])
+})
+
+/* ── Init ── */
+async function init() {
+  cachedUsed = await updateBudgetBar()
+  updateCalcDisplay()
+}
+init()
+</script>
+
+<!--
+  ══════════════════════════════════════════════
+  SQL สำหรับสร้าง table ใน Supabase
+  ไปที่ SQL Editor แล้วรันคำสั่งนี้:
+
+  create table kk_records (
+    id           uuid primary key default gen_random_uuid(),
+    device_id    text not null,
+    total_amount numeric(10,2) not null,
+    gov_amount   numeric(10,2) not null,
+    ppl_amount   numeric(10,2) not null,
+    created_at   timestamptz default now()
+  );
+
+  create index on kk_records (device_id, created_at);
+
+  -- อนุญาตให้ insert/select/delete โดยไม่ต้อง login:
+  alter table kk_records enable row level security;
+
+  create policy "device can insert" on kk_records
+    for insert with check (true);
+
+  create policy "device can select own" on kk_records
+    for select using (true);
+
+  create policy "device can delete own" on kk_records
+    for delete using (true);
+
+  ══════════════════════════════════════════════
+-->
+</body>
+</html>
